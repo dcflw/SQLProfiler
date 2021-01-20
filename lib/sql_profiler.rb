@@ -1,5 +1,5 @@
 class SQLProfiler
-  VERSION = 0.1
+  VERSION = "0.1.1"
 
   class Result
     attr_reader :entries
@@ -25,15 +25,24 @@ class SQLProfiler
   def self.run
     raise ArgumentError.new("Block is required") unless block_given?
     queries = []
-    subscriber = ActiveSupport::Notifications.subscribe("sql.active_record") do |name, start, finish, id, payload|
+    subscriber = ActiveSupport::Notifications.subscribe("sql.active_record") do |_name, start, finish, _id, payload|
+
+      query = payload[:sql].strip
+      # replace binds with values
+      payload[:binds].each_with_index do |bind, i|
+        query.gsub!("$#{i+1}", bind.value.to_s)
+      end
+
       queries << {
         start: start,
         finish: finish,
         duration: ((finish - start) * 1000).round(4),
-        query: payload[:sql].strip
+        query: query
       }
     end
+
     yield
+
     ActiveSupport::Notifications.unsubscribe(subscriber)
     Result.new(queries)
   end
