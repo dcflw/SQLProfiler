@@ -4,7 +4,7 @@
 Add this line to your application's Gemfile:
 
 ```ruby
-gem 'sql_profiler', github: "dcflw/sql_profiler"
+gem 'sql_profiler', github: "dcflw/SQLProfiler"
 ```
 
 ## Usage
